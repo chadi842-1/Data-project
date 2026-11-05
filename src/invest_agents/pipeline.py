@@ -130,6 +130,14 @@ def render_results(paths: Paths) -> str:
           "A model is only better than the baseline if the interval for its F1 difference "
           "excludes 0. Intervals that straddle 0 are noise at this test size.", "",
           "![Model comparison](model_comparison.png)", "",
+          "## Calibration", "",
+          "How well predicted probabilities match observed invest rates on the test set. "
+          "Lower Brier and ECE are better; the reliability curve should hug the diagonal.", "",
+          "| Model | Brier | ECE |", "|---|---|---|"]
+    for name, r in metrics["models"].items():
+        t = r["test"]
+        L.append(f"| {name} | {t['brier']:.3f} | {t.get('ece', float('nan')):.3f} |")
+    L += ["", "![Calibration](calibration.png)", "",
           "## What drives the decision", "",
           "| Criterion | Mean abs SHAP | AUC drop when shuffled |", "|---|---|---|"]
     for f in shap_imp.index:

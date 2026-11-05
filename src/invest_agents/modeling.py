@@ -105,6 +105,44 @@ def best_threshold(y: np.ndarray, p: np.ndarray, grid: np.ndarray = THRESHOLD_GR
     return float(cands[np.argmin(np.abs(cands - 0.5))]), float(best)
 
 
+def expected_calibration_error(y: np.ndarray, p: np.ndarray, n_bins: int = 10) -> float:
+    """Expected calibration error: average |observed rate - predicted P| over equal-width bins,
+    weighted by bin population. 0 = perfectly calibrated probabilities."""
+    y = np.asarray(y, dtype=float)
+    p = np.asarray(p, dtype=float)
+    edges = np.linspace(0.0, 1.0, n_bins + 1)
+    bin_of = np.clip(np.digitize(p, edges[1:-1]), 0, n_bins - 1)
+    n = len(p)
+    ece = 0.0
+    for b in range(n_bins):
+        mask = bin_of == b
+        if not mask.any():
+            continue
+        ece += mask.sum() / n * abs(y[mask].mean() - p[mask].mean())
+    return float(ece)
+
+
+def best_threshold_cost(
+    y: np.ndarray, p: np.ndarray, cost_fp: float = 1.0, cost_fn: float = 1.0,
+    grid: np.ndarray = THRESHOLD_GRID,
+) -> tuple[float, float]:
+    """Threshold on `grid` that minimises expected misclassification cost.
+
+    A false positive (back a project that fails) costs `cost_fp`; a false negative (skip a
+    project that would have paid off) costs `cost_fn`. Returns (threshold, mean cost per project).
+    Ties go to the threshold closest to 0.5. Use it when the two error types are not equally
+    expensive: raising `cost_fn` lowers the threshold, raising `cost_fp` raises it.
+    """
+    yb = np.asarray(y).astype(bool)[:, None]
+    pred = np.asarray(p, dtype=float)[:, None] >= grid[None, :]
+    fp = (pred & ~yb).sum(0)
+    fn = (~pred & yb).sum(0)
+    cost = (cost_fp * fp + cost_fn * fn) / len(p)
+    best = cost.min()
+    cands = grid[cost <= best + 1e-12]
+    return float(cands[np.argmin(np.abs(cands - 0.5))]), float(best)
+
+
 def evaluate(y: np.ndarray, p: np.ndarray, threshold: float) -> dict[str, float]:
     pred = (p >= threshold).astype(int)
     return {
@@ -113,6 +151,7 @@ def evaluate(y: np.ndarray, p: np.ndarray, threshold: float) -> dict[str, float]
         "recall": float(recall_score(y, pred)),
         "auc": float(roc_auc_score(y, p)),
         "brier": float(brier_score_loss(y, p)),
+        "ece": expected_calibration_error(y, p),
     }
 
 
@@ -138,7 +177,7 @@ def select_model(results: dict[str, dict], margin: float) -> tuple[str, str]:
     if not better:
         return BASELINE, (f"no model beat the baseline validation F1 ({base:.3f}) "
                           f"by more than {margin}; simpler model kept")
-    best = max(better, key=better.get)
+    best = max(better, key=lambda n: better[n])
     gain = better[best] - base
     return best, f"{best} beat the baseline on validation F1 by {gain:.3f} (> {margin})"
 
@@ -151,6 +190,8 @@ class TrainingResult:
     best: str
     selection_reason: str
     meta: dict = field(default_factory=dict)
+    test_proba: dict[str, np.ndarray] = field(default_factory=dict)  # per-model P(invest) on test
+    y_test: np.ndarray | None = None                                 # test labels (for calibration)
 
 
 def _py(obj):
@@ -180,7 +221,7 @@ def train_and_evaluate(
     X_te, y_te = test[FEATURES], test[TARGET].to_numpy()
     idx = np.random.default_rng(seed).integers(0, len(y_te), size=(n_boot, len(y_te)))
 
-    pipelines, thresholds, results, boots = {}, {}, {}, {}
+    pipelines, thresholds, results, boots, test_proba = {}, {}, {}, {}, {}
     for name, (pipe, dist) in model_specs(seed).items():
         search = RandomizedSearchCV(
             pipe, dist, n_iter=n_iter, scoring="neg_log_loss", refit=True, n_jobs=n_jobs,
@@ -190,6 +231,7 @@ def train_and_evaluate(
         t, val_f1 = best_threshold(y_va, model.predict_proba(X_va)[:, 1])
         p_te = model.predict_proba(X_te)[:, 1]
         boots[name] = bootstrap_f1(y_te, (p_te >= t).astype(int), idx)
+        test_proba[name] = p_te
         pipelines[name], thresholds[name] = model, t
         results[name] = {
             "best_params": search.best_params_,
@@ -211,7 +253,8 @@ def train_and_evaluate(
     best, reason = select_model(results, parsimony_margin)
     meta = {"n_train": len(train), "n_val": len(val), "n_test": len(test), "n_boot": n_boot,
             "n_iter": n_iter, "cv_folds": cv_folds, "parsimony_margin": parsimony_margin}
-    return TrainingResult(pipelines, thresholds, _py(results), best, reason, meta)
+    return TrainingResult(pipelines, thresholds, _py(results), best, reason, meta,
+                          test_proba=test_proba, y_test=y_te)
 
 
 # -------------------------------------------------------------------------- explanation
@@ -308,6 +351,94 @@ def plot_model_comparison(res: TrainingResult, n_test: int, out_path) -> None:
     plt.close(fig)
 
 
+def plot_calibration(res: TrainingResult, out_path, n_bins: int = 10) -> None:
+    """Reliability diagram: observed invest rate vs predicted P(invest) on the test set.
+
+    A well-calibrated model sits on the diagonal. The legend reports each model's ECE.
+    """
+    import matplotlib.pyplot as plt
+    from sklearn.calibration import calibration_curve
+
+    if res.y_test is None or not res.test_proba:
+        return
+    viz.apply_style()
+    fig, ax = plt.subplots(figsize=(5.4, 5.0))
+    ax.plot([0, 1], [0, 1], "--", color=viz.INK_2, lw=1, label="perfectly calibrated")
+    for name in res.results:
+        frac_pos, mean_pred = calibration_curve(
+            res.y_test, res.test_proba[name], n_bins=n_bins, strategy="quantile")
+        ece = res.results[name]["test"].get("ece", float("nan"))
+        ax.plot(mean_pred, frac_pos, "o-", color=viz.MODEL_COLORS[name], ms=5, lw=1.8,
+                label=f"{name} (ECE {ece:.3f})")
+    ax.set_xlabel("Mean predicted P(invest)")
+    ax.set_ylabel("Observed invest rate")
+    ax.set_xlim(0, 1)
+    ax.set_ylim(0, 1)
+    ax.legend(loc="upper left", fontsize=8, frameon=False)
+    viz.title(ax, "Calibration (reliability) on held-out data",
+              f"quantile bins, n = {len(res.y_test)}")
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=140)
+    plt.close(fig)
+
+
+def write_model_card(res: TrainingResult, out_path) -> None:
+    """A short, auto-generated model card for the selected model (Mitchell et al., 2019)."""
+    best = res.results[res.best]
+    t = best["test"]
+    st = res.meta
+    diff = best.get("f1_diff_vs_baseline")
+    lines = [
+        f"# Model card: {res.best}", "",
+        "Auto-generated by `invest-pipeline`. All data is **synthetic**; these numbers describe "
+        "the simulation in `src/invest_agents/data.py`, not real-world investment performance.", "",
+        "## Intended use", "",
+        "- Rank a pool of candidate investment projects and attach an INVEST / REVIEW / REJECT "
+        "verdict under an explicit, editable `DecisionPolicy`.",
+        "- Decision support for a human committee, **not** an automated trading or allocation "
+        "system. The verdict is advisory and every number is auditable.", "",
+        "## Model", "",
+        f"- Type: {res.best}, selected by a parsimony rule — {res.selection_reason}.",
+        "- Preprocessing (inside the pipeline, re-fitted per CV fold): median imputation + "
+        "standardisation.",
+        f"- Decision threshold: {res.thresholds[res.best]:.3f} (F1-maximising on validation).",
+        f"- Training data: {st.get('n_train', '?')} train / {st.get('n_val', '?')} validation / "
+        f"{st.get('n_test', '?')} test projects, 8 criteria.", "",
+        "## Held-out performance (test split, used once)", "",
+        "| Metric | Value |", "|---|---|",
+        f"| F1 | {t['f1']:.3f} {_ci(best['test_f1_ci95'])} |",
+        f"| Precision | {t['precision']:.3f} |",
+        f"| Recall | {t['recall']:.3f} |",
+        f"| ROC AUC | {t['auc']:.3f} |",
+        f"| Brier score | {t['brier']:.3f} |",
+        f"| Expected calibration error | {t.get('ece', float('nan')):.3f} |",
+    ]
+    if diff:
+        lines += [
+            f"| ΔF1 vs {BASELINE} | {diff['mean']:+.3f} {_ci(diff['ci95'])} "
+            f"(P better {diff['p_better']:.2f}) |",
+        ]
+    lines += [
+        "", "![Calibration](calibration.png)", "",
+        "## Limitations", "",
+        "- Synthetic data: no claim about real investment returns.",
+        "- The test split is small, so the F1 interval is wide.",
+        "- Probabilities should be read together with the calibration curve above; the decision "
+        "threshold assumes equal-cost errors unless `best_threshold_cost` is used.",
+        "- Rankings from AHP + TOPSIS are relative to the submitted pool and sensitive to the "
+        "(illustrative) criteria weights.", "",
+        "## Ethical and operational notes", "",
+        "- Keep a human in the loop; log every decision via the workflow `trace`.",
+        "- Re-elicit the AHP weights and re-validate on real, representative data before any use "
+        "beyond demonstration.", "",
+    ]
+    out_path.write_text("\n".join(lines))
+
+
+def _ci(v) -> str:
+    return f"[{v[0]:.3f}, {v[1]:.3f}]"
+
+
 # ------------------------------------------------------------------------------ artifacts
 def save_artifacts(res: TrainingResult, train: pd.DataFrame, paths: Paths) -> None:
     """Persist the selected model for inference (artifacts/) and metrics for humans (reports/)."""
@@ -338,6 +469,8 @@ def run_training(
     print(f"[MODEL] selected: {res.best} ({res.selection_reason})")
     save_artifacts(res, train, paths)
     plot_model_comparison(res, len(test), paths.reports / "model_comparison.png")
+    plot_calibration(res, paths.reports / "calibration.png")
+    write_model_card(res, paths.reports / "model_card.md")
     global_explanations(res.pipelines[res.best], val[FEATURES], val[TARGET].to_numpy(),
                         paths.reports, seed)
     return res

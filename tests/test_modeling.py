@@ -8,14 +8,18 @@ from invest_agents.modeling import (
     BASELINE,
     THRESHOLD_GRID,
     best_threshold,
+    best_threshold_cost,
     bootstrap_f1,
+    expected_calibration_error,
     expected_value,
     global_explanations,
     make_explainer,
     percentile_ci,
+    plot_calibration,
     select_model,
     shap_matrix,
     train_and_evaluate,
+    write_model_card,
 )
 
 
@@ -54,6 +58,30 @@ def test_best_threshold_on_separable_data_and_tie_break():
 def test_percentile_ci_orders_bounds():
     lo, hi = percentile_ci(np.arange(101))
     assert lo == pytest.approx(2.5) and hi == pytest.approx(97.5)
+
+
+def test_expected_calibration_error_is_zero_when_perfect():
+    # predicted probability equals the observed rate in every bin -> ECE 0
+    assert expected_calibration_error(
+        np.array([0, 0, 1, 1]), np.array([0.0, 0.0, 1.0, 1.0])) == pytest.approx(0.0, abs=1e-9)
+    # a bin where half the labels are positive and p = 0.5 is also perfectly calibrated
+    assert expected_calibration_error(
+        np.array([0, 1, 0, 1]), np.array([0.5, 0.5, 0.5, 0.5])) == pytest.approx(0.0, abs=1e-9)
+    # a confidently wrong model is maximally miscalibrated
+    assert expected_calibration_error(np.array([0, 0]), np.array([1.0, 1.0])) == pytest.approx(1.0)
+    assert 0.0 <= expected_calibration_error(
+        np.array([0, 1, 0, 1]), np.array([0.3, 0.3, 0.7, 0.7])) <= 1.0
+
+
+def test_best_threshold_cost_shifts_with_asymmetric_costs():
+    rng = np.random.default_rng(0)
+    y = rng.integers(0, 2, 200)
+    p = np.clip(0.5 * y + rng.normal(0.25, 0.2, 200), 0, 1)
+    t_fn, _ = best_threshold_cost(y, p, cost_fp=1.0, cost_fn=5.0)   # misses are costly
+    t_fp, _ = best_threshold_cost(y, p, cost_fp=5.0, cost_fn=1.0)   # false bets are costly
+    assert t_fn <= t_fp
+    t_eq, cost = best_threshold_cost(y, p, 1.0, 1.0)
+    assert THRESHOLD_GRID.min() <= t_eq <= THRESHOLD_GRID.max() and cost >= 0
 
 
 def test_parsimony_rule():
@@ -113,6 +141,22 @@ def test_shap_values_are_additive_for_every_model(trained, splits):
         sv = shap_matrix(ex, x)
         assert sv.shape == (40, len(FEATURES)), name
         assert np.allclose(sv.sum(1) + expected_value(ex), _margin(clf, x), atol=1e-3), name
+
+
+def test_training_keeps_test_probabilities_and_reports_calibration(trained, splits):
+    _, _, test = splits
+    assert trained.y_test is not None and len(trained.y_test) == len(test)
+    for name, r in trained.results.items():
+        assert trained.test_proba[name].shape == (len(test),)
+        assert 0.0 <= r["test"]["ece"] <= 1.0
+
+
+def test_plot_calibration_and_model_card_write_files(trained, tmp_path):
+    plot_calibration(trained, tmp_path / "calibration.png")
+    assert (tmp_path / "calibration.png").exists()
+    write_model_card(trained, tmp_path / "model_card.md")
+    card = (tmp_path / "model_card.md").read_text()
+    assert trained.best in card and "calibration error" in card.lower()
 
 
 def test_global_explanations_write_files(trained, splits, tmp_path):
