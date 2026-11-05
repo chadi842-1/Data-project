@@ -38,11 +38,16 @@ Python 3.12+.
 ```bash
 pip install -e ".[dev]"
 invest-pipeline                              # generate, ETL, train, validate, report (~15 s)
-pytest -q                                    # 85 tests
+pytest -q                                    # 94 tests
+make check                                   # ruff + mypy + pytest (what CI runs)
 uvicorn invest_agents.api:app --port 8000    # API  (docs at /docs)
 invest-ui                                    # Streamlit UI
 invest-experiments                           # when do trees beat logistic regression?
 ```
+
+Developer tooling: `make lint` (ruff), `make typecheck` (mypy, with the Pydantic plugin),
+`make cov` (tests + coverage), and a `.pre-commit-config.yaml` that mirrors CI
+(`pre-commit install`).
 
 API call:
 
@@ -59,7 +64,10 @@ curl -s localhost:8000/decide -H 'Content-Type: application/json' -d '{
 ```
 
 Bad records are reported in `ingestion.rejected`; fewer than 2 valid projects gives a 422 that says
-why. `/health`, `/ready` and `/model-info` complete the API.
+why. `POST /decide/csv` does the same from an uploaded CSV (policy knobs as optional query
+parameters). `/`, `/health`, `/ready` and `/model-info` complete the API. Every response carries an
+`x-request-id` and an `x-process-time-ms` header, CORS is configurable with
+`INVEST_AGENTS_CORS_ORIGINS`, and unexpected failures return a uniform JSON error envelope.
 
 Docker: `docker build -t invest-agents .` then `docker run -p 8000:8000 invest-agents`
 (UI: `docker run -p 8501:8501 invest-agents invest-ui --server.address 0.0.0.0`).
@@ -122,6 +130,10 @@ weights are illustrative placeholders (consistency ratio 0.010), not expert judg
 - **Fair comparison:** every model gets the same CV search and the same validation-chosen
   threshold; the test set is used once; F1 differences come with paired bootstrap intervals.
 - **Explainability that adds up:** SHAP values are tested to sum to each model's raw output.
+- **Calibration, honestly reported:** the pipeline writes a reliability diagram
+  (`reports/calibration.png`), the expected calibration error next to the Brier score, and an
+  auto-generated model card (`reports/model_card.md`). `best_threshold_cost` picks the decision
+  threshold when a false positive and a false negative are not equally expensive.
 - **Policy as data:** thresholds and the compliance knockout are a validated `DecisionPolicy`;
   the verdict rule is a pure function with unit tests.
 - **Robustness of the ranking:** a Monte Carlo over Dirichlet-perturbed weights gives each
@@ -147,7 +159,7 @@ src/invest_agents/
   mcda.py         AHP, TOPSIS, weight sensitivity     agents.py       LangGraph workflow
   api.py          FastAPI                             ui.py           Streamlit
   pipeline.py     end-to-end + ranking validation     experiments.py  nonlinearity study
-tests/            85 tests (unit, integration, API, UI smoke)
-reports/          generated results, figures and metrics (committed)
+tests/            94 tests (unit, integration, API, UI smoke)
+reports/          generated results, figures, metrics and a model card (committed)
 data/, artifacts/ regenerable (gitignored)
 ```

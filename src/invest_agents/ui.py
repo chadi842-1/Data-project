@@ -94,7 +94,8 @@ def main() -> None:
     df = load_input()
     if df is not None:
         st.dataframe(df.head(50), width="stretch", hide_index=True)
-    if st.button("Rank projects", type="primary", disabled=df is None or policy is None):
+    clicked = st.button("Rank projects", type="primary", disabled=df is None or policy is None)
+    if clicked and df is not None and policy is not None:
         cols = [c for c in [ID_COL, *FEATURES] if c in df.columns]
         st.session_state["result"] = run_workflow(
             df[cols].to_dict("records"), policy, scorer)
