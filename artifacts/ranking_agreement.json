@@ -1,0 +1,7 @@
+{
+  "pools": 200,
+  "pool_size": 12,
+  "spearman_mean": 0.822,
+  "spearman_min": 0.294,
+  "spearman_max": 0.993
+}

@@ -1,0 +1,19 @@
+{
+  "LogisticRegression": {
+    "f1_val": 0.7865,
+    "f1_test": 0.7698,
+    "auc_test": 0.9112
+  },
+  "LightGBM": {
+    "f1_val": 0.7846,
+    "f1_test": 0.7692,
+    "auc_test": 0.8902
+  },
+  "XGBoost": {
+    "f1_val": 0.7605,
+    "f1_test": 0.7766,
+    "auc_test": 0.8999
+  },
+  "best_model": "LogisticRegression",
+  "f1_test_gain_over_baseline": 0.0
+}
