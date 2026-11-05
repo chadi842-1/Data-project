@@ -102,4 +102,15 @@ def main() -> None:
         show_result(st.session_state["result"])
 
 
-main()
+def launch() -> None:
+    """Console-script entry point: `invest-ui` starts the Streamlit server on this file."""
+    import sys
+
+    from streamlit.web import cli
+
+    sys.argv = ["streamlit", "run", __file__, *sys.argv[1:]]
+    sys.exit(cli.main())
+
+
+if __name__ == "__main__":  # Streamlit executes the script as __main__
+    main()

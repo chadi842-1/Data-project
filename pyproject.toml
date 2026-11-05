@@ -7,7 +7,7 @@ name = "invest-agents"
 version = "0.2.0"
 description = "Agentic multicriteria investment decision: ML scoring + AHP/TOPSIS + LangGraph agents"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "numpy>=1.26",
     "pandas>=2.1",
@@ -25,6 +25,11 @@ dependencies = [
     "streamlit>=1.50",
     "httpx>=0.27",
 ]
+
+[project.scripts]
+invest-pipeline = "invest_agents.pipeline:main"
+invest-experiments = "invest_agents.experiments:main"
+invest-ui = "invest_agents.ui:launch"
 
 [project.optional-dependencies]
 dev = ["pytest>=8", "ruff>=0.4"]
