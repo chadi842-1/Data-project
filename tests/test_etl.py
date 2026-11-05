@@ -66,7 +66,7 @@ def test_validate_schema_flags_out_of_range_rows():
 
 
 def test_schemas_levels():
-    ok = {ID_COL: "P1", **{f: 10.0 for f in FEATURES}, "risque": 40.0, "delai": 12.0}
+    ok = {ID_COL: "P1", **dict.fromkeys(FEATURES, 10.0), "risque": 40.0, "delai": 12.0}
     ProjectIn(**ok)
     with pytest.raises(ValidationError):
         ProjectIn(**{**ok, "risque": 101.0})

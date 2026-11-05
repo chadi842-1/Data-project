@@ -21,7 +21,7 @@ def test_clean_generation_shape_and_bounds():
 def test_defects_add_expected_rows():
     df = generate_projects(n=500, defects=True)
     assert len(df) == 500 + N_DUPLICATES + N_CORRUPT
-    assert df.duplicated(subset=FEATURES + [TARGET]).sum() == N_DUPLICATES
+    assert df.duplicated(subset=[*FEATURES, TARGET]).sum() == N_DUPLICATES
     assert df[FEATURES].isna().any().any()
     out_of_bounds = sum((~df[f].between(*BOUNDS[f]) & df[f].notna()).sum() for f in FEATURES)
     assert out_of_bounds == N_CORRUPT

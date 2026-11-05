@@ -5,7 +5,7 @@ from __future__ import annotations
 import matplotlib
 
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt  # noqa: E402
+import matplotlib.pyplot as plt
 
 SURFACE = "#fcfcfb"
 INK = "#0b0b0b"

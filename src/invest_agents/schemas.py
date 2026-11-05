@@ -8,7 +8,7 @@
 """
 from __future__ import annotations
 
-from typing import Annotated, Optional
+from typing import Annotated
 
 from pydantic import Field, create_model
 
@@ -20,20 +20,22 @@ def _bounded(feature: str):
     return Annotated[float, Field(ge=lo, le=hi)]
 
 
-ProjectIn = create_model(
+# create_model is built from dynamic field dicts, which mypy's overloads cannot match; the
+# field specs themselves are correct, so the call-overload error is suppressed on each.
+ProjectIn = create_model(  # type: ignore[call-overload]
     "ProjectIn",
     **{ID_COL: (str, ...)},
     **{f: (_bounded(f), ...) for f in FEATURES},
 )
 
-ProjectRecord = create_model(
+ProjectRecord = create_model(  # type: ignore[call-overload]
     "ProjectRecord",
     **{ID_COL: (str, ...)},
-    **{f: (Optional[_bounded(f)], None) for f in FEATURES},
+    **{f: (_bounded(f) | None, None) for f in FEATURES},
 )
 
-ProjectLoose = create_model(
+ProjectLoose = create_model(  # type: ignore[call-overload]
     "ProjectLoose",
     **{ID_COL: (str, ...)},
-    **{f: (Optional[float], None) for f in FEATURES},
+    **dict.fromkeys(FEATURES, (float | None, None)),
 )

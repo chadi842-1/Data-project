@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import math
 import operator
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from functools import partial
 from typing import Annotated, Literal, TypedDict
 
@@ -249,7 +249,7 @@ def build_graph(
 
 
 def run_workflow(
-    projects: list[dict | BaseModel],
+    projects: Sequence[dict | BaseModel],
     policy: DecisionPolicy | None = None,
     scorer: Scorer | None = None,
     rationale_fn: Callable[[dict], str] | None = None,

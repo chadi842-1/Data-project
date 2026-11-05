@@ -47,7 +47,7 @@ def validate_schema(df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
 def clean(df: pd.DataFrame) -> tuple[pd.DataFrame, EtlReport]:
     """Drop duplicates (on features + label), then drop schema violations."""
     report = EtlReport(n_raw=len(df))
-    deduped = df.drop_duplicates(subset=FEATURES + [TARGET]).reset_index(drop=True)
+    deduped = df.drop_duplicates(subset=[*FEATURES, TARGET]).reset_index(drop=True)
     report.n_duplicates_dropped = len(df) - len(deduped)
     valid, rejected = validate_schema(deduped)
     report.n_schema_rejected = len(rejected)
