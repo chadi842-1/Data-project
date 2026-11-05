@@ -1,0 +1,429 @@
+{
+  "model": "LogisticRegression",
+  "threshold": 0.44000000000000006,
+  "ingestion": {
+    "n_received": 12,
+    "n_valid": 12,
+    "rejected": []
+  },
+  "analysis": [
+    {
+      "project_id": "P01168",
+      "proba_go": 0.6269856319403618,
+      "ml_go": true,
+      "drivers": [
+        {
+          "feature": "impact",
+          "value": 69.89150858388729,
+          "shap": 1.2406421000810397
+        },
+        {
+          "feature": "risque",
+          "value": 57.72467423726147,
+          "shap": -0.7181176670487105
+        },
+        {
+          "feature": "conformite",
+          "value": 83.90400531581254,
+          "shap": 0.6098302269606257
+        }
+      ]
+    },
+    {
+      "project_id": "P00191",
+      "proba_go": 0.06376573277735091,
+      "ml_go": false,
+      "drivers": [
+        {
+          "feature": "risque",
+          "value": 78.33407697984215,
+          "shap": -2.1272549496213267
+        },
+        {
+          "feature": "rentabilite",
+          "value": 22.24499017285484,
+          "shap": 1.521187426313621
+        },
+        {
+          "feature": "maturite",
+          "value": 10.615383347374197,
+          "shap": -1.0242597073635595
+        }
+      ]
+    },
+    {
+      "project_id": "P00624",
+      "proba_go": 0.0886065872491372,
+      "ml_go": false,
+      "drivers": [
+        {
+          "feature": "liquidite",
+          "value": 20.34987278767632,
+          "shap": -0.5360369717623527
+        },
+        {
+          "feature": "impact",
+          "value": 39.03562098281682,
+          "shap": -0.43663394384315524
+        },
+        {
+          "feature": "conformite",
+          "value": 59.22938486270244,
+          "shap": -0.36272665104793794
+        }
+      ]
+    },
+    {
+      "project_id": "P01747",
+      "proba_go": 0.987593415233949,
+      "ml_go": true,
+      "drivers": [
+        {
+          "feature": "risque",
+          "value": 19.355639811320145,
+          "shap": 1.905308037287634
+        },
+        {
+          "feature": "rentabilite",
+          "value": 24.246664776872635,
+          "shap": 1.8584312812822117
+        },
+        {
+          "feature": "impact",
+          "value": 64.8578674993821,
+          "shap": 0.9670215284122391
+        }
+      ]
+    },
+    {
+      "project_id": "P01918",
+      "proba_go": 0.6198441642328669,
+      "ml_go": true,
+      "drivers": [
+        {
+          "feature": "rentabilite",
+          "value": 25.04775023748126,
+          "shap": 1.9933988471156747
+        },
+        {
+          "feature": "conformite",
+          "value": 44.75191644057384,
+          "shap": -0.9333600075710868
+        },
+        {
+          "feature": "liquidite",
+          "value": 9.094991509425643,
+          "shap": -0.7455163418451205
+        }
+      ]
+    },
+    {
+      "project_id": "P01048",
+      "proba_go": 0.07905651614630317,
+      "ml_go": false,
+      "drivers": [
+        {
+          "feature": "impact",
+          "value": 15.317778075494411,
+          "shap": -1.725897446366063
+        },
+        {
+          "feature": "liquidite",
+          "value": 22.202186097850745,
+          "shap": -0.501561137160606
+        },
+        {
+          "feature": "rentabilite",
+          "value": 16.064868458052455,
+          "shap": 0.47995521649710055
+        }
+      ]
+    },
+    {
+      "project_id": "P01263",
+      "proba_go": 0.9702633500168615,
+      "ml_go": true,
+      "drivers": [
+        {
+          "feature": "risque",
+          "value": 14.07756970006325,
+          "shap": 2.2661882368112116
+        },
+        {
+          "feature": "impact",
+          "value": 85.75336002237577,
+          "shap": 2.1028666380372347
+        },
+        {
+          "feature": "delai",
+          "value": 49.133285538663806,
+          "shap": -1.0473185774231204
+        }
+      ]
+    },
+    {
+      "project_id": "P01971",
+      "proba_go": 0.9969865851449917,
+      "ml_go": true,
+      "drivers": [
+        {
+          "feature": "rentabilite",
+          "value": 37.65595346812216,
+          "shap": 4.117639746807372
+        },
+        {
+          "feature": "impact",
+          "value": 88.51506640007347,
+          "shap": 2.2529885210163623
+        },
+        {
+          "feature": "maturite",
+          "value": 28.941174683883453,
+          "shap": -0.6241335913150833
+        }
+      ]
+    },
+    {
+      "project_id": "P00825",
+      "proba_go": 0.31585805565529423,
+      "ml_go": false,
+      "drivers": [
+        {
+          "feature": "rentabilite",
+          "value": 5.274670367329083,
+          "shap": -1.3379866171486698
+        },
+        {
+          "feature": "risque",
+          "value": 30.347079957921704,
+          "shap": 1.1537846528791524
+        },
+        {
+          "feature": "conformite",
+          "value": 83.81946154498516,
+          "shap": 0.6064979112329248
+        }
+      ]
+    },
+    {
+      "project_id": "P01274",
+      "proba_go": 0.4486475060436269,
+      "ml_go": true,
+      "drivers": [
+        {
+          "feature": "rentabilite",
+          "value": 19.75874793851415,
+          "shap": 1.1023032011694407
+        },
+        {
+          "feature": "conformite",
+          "value": 88.81490415073232,
+          "shap": 0.8033946405726483
+        },
+        {
+          "feature": "impact",
+          "value": 33.61899113785633,
+          "shap": -0.7310731638460788
+        }
+      ]
+    },
+    {
+      "project_id": "P01249",
+      "proba_go": 0.09325566588717718,
+      "ml_go": false,
+      "drivers": [
+        {
+          "feature": "risque",
+          "value": 60.61641925257262,
+          "shap": -0.9158364347231109
+        },
+        {
+          "feature": "impact",
+          "value": 31.59218672717323,
+          "shap": -0.8412469669046794
+        },
+        {
+          "feature": "liquidite",
+          "value": 14.997529054447462,
+          "shap": -0.6356564671603083
+        }
+      ]
+    },
+    {
+      "project_id": "P00215",
+      "proba_go": 0.10695453903474623,
+      "ml_go": false,
+      "drivers": [
+        {
+          "feature": "impact",
+          "value": 15.875372302800534,
+          "shap": -1.6955875278253127
+        },
+        {
+          "feature": "risque",
+          "value": 29.53469705426768,
+          "shap": 1.209330126542895
+        },
+        {
+          "feature": "cout",
+          "value": 65.67873712745936,
+          "shap": -0.9650243894521946
+        }
+      ]
+    }
+  ],
+  "decision": {
+    "ahp_weights": {
+      "rentabilite": 0.21734011023746275,
+      "risque": 0.19820036109240913,
+      "delai": 0.09424333902301048,
+      "impact": 0.15504291631748857,
+      "cout": 0.11352689664192542,
+      "liquidite": 0.07868638905776681,
+      "maturite": 0.04871664860692638,
+      "conformite": 0.09424333902301048
+    },
+    "ahp_consistency_ratio": 0.010189667273543822,
+    "rank_stability": 0.9048,
+    "recommendations": [
+      {
+        "project_id": "P01971",
+        "rank": 1,
+        "topsis_score": 0.7378,
+        "proba_go": 0.997,
+        "rank_mean": 1.58,
+        "rank_std": 0.68,
+        "verdict": "INVEST",
+        "knockout": null,
+        "rationale": "Rank 1/12 (TOPSIS 0.74), P(invest) 100%. Main drivers: rentabilite (+), impact (+), maturite (-)."
+      },
+      {
+        "project_id": "P01747",
+        "rank": 2,
+        "topsis_score": 0.7332,
+        "proba_go": 0.9876,
+        "rank_mean": 1.52,
+        "rank_std": 0.5,
+        "verdict": "INVEST",
+        "knockout": null,
+        "rationale": "Rank 2/12 (TOPSIS 0.73), P(invest) 99%. Main drivers: risque (+), rentabilite (+), impact (+)."
+      },
+      {
+        "project_id": "P01263",
+        "rank": 3,
+        "topsis_score": 0.6156,
+        "proba_go": 0.9703,
+        "rank_mean": 3.67,
+        "rank_std": 1.41,
+        "verdict": "INVEST",
+        "knockout": null,
+        "rationale": "Rank 3/12 (TOPSIS 0.62), P(invest) 97%. Main drivers: risque (+), impact (+), delai (-)."
+      },
+      {
+        "project_id": "P01918",
+        "rank": 4,
+        "topsis_score": 0.5931,
+        "proba_go": 0.6198,
+        "rank_mean": 3.86,
+        "rank_std": 1.04,
+        "verdict": "INVEST",
+        "knockout": null,
+        "rationale": "Rank 4/12 (TOPSIS 0.59), P(invest) 62%. Main drivers: rentabilite (+), conformite (-), liquidite (-)."
+      },
+      {
+        "project_id": "P01168",
+        "rank": 5,
+        "topsis_score": 0.5216,
+        "proba_go": 0.627,
+        "rank_mean": 5.72,
+        "rank_std": 1.18,
+        "verdict": "INVEST",
+        "knockout": null,
+        "rationale": "Rank 5/12 (TOPSIS 0.52), P(invest) 63%. Main drivers: impact (+), risque (-), conformite (+)."
+      },
+      {
+        "project_id": "P01274",
+        "rank": 6,
+        "topsis_score": 0.516,
+        "proba_go": 0.4486,
+        "rank_mean": 5.97,
+        "rank_std": 1.05,
+        "verdict": "REVIEW",
+        "knockout": null,
+        "rationale": "Rank 6/12 (TOPSIS 0.52), P(invest) 45%. Main drivers: rentabilite (+), conformite (+), impact (-)."
+      },
+      {
+        "project_id": "P00191",
+        "rank": 7,
+        "topsis_score": 0.4916,
+        "proba_go": 0.0638,
+        "rank_mean": 7.52,
+        "rank_std": 2.1,
+        "verdict": "REJECT",
+        "knockout": null,
+        "rationale": "Rank 7/12 (TOPSIS 0.49), P(invest) 6%. Main drivers: risque (-), rentabilite (+), maturite (-). Rank is sensitive to the criteria weights (std 2.1)."
+      },
+      {
+        "project_id": "P01048",
+        "rank": 8,
+        "topsis_score": 0.4613,
+        "proba_go": 0.0791,
+        "rank_mean": 8.71,
+        "rank_std": 1.26,
+        "verdict": "REJECT",
+        "knockout": null,
+        "rationale": "Rank 8/12 (TOPSIS 0.46), P(invest) 8%. Main drivers: impact (-), liquidite (-), rentabilite (+)."
+      },
+      {
+        "project_id": "P01249",
+        "rank": 9,
+        "topsis_score": 0.4549,
+        "proba_go": 0.0933,
+        "rank_mean": 9.25,
+        "rank_std": 1.32,
+        "verdict": "REJECT",
+        "knockout": null,
+        "rationale": "Rank 9/12 (TOPSIS 0.45), P(invest) 9%. Main drivers: risque (-), impact (-), liquidite (-)."
+      },
+      {
+        "project_id": "P00825",
+        "rank": 10,
+        "topsis_score": 0.4539,
+        "proba_go": 0.3159,
+        "rank_mean": 8.33,
+        "rank_std": 2.18,
+        "verdict": "REJECT",
+        "knockout": null,
+        "rationale": "Rank 10/12 (TOPSIS 0.45), P(invest) 32%. Main drivers: rentabilite (-), risque (+), conformite (+). Rank is sensitive to the criteria weights (std 2.2)."
+      },
+      {
+        "project_id": "P00624",
+        "rank": 11,
+        "topsis_score": 0.42,
+        "proba_go": 0.0886,
+        "rank_mean": 10.28,
+        "rank_std": 1.02,
+        "verdict": "REJECT",
+        "knockout": null,
+        "rationale": "Rank 11/12 (TOPSIS 0.42), P(invest) 9%. Main drivers: liquidite (-), impact (-), conformite (-)."
+      },
+      {
+        "project_id": "P00215",
+        "rank": 12,
+        "topsis_score": 0.3359,
+        "proba_go": 0.107,
+        "rank_mean": 11.57,
+        "rank_std": 1.24,
+        "verdict": "REJECT",
+        "knockout": null,
+        "rationale": "Rank 12/12 (TOPSIS 0.34), P(invest) 11%. Main drivers: impact (-), risque (+), cout (-)."
+      }
+    ],
+    "warnings": []
+  },
+  "trace": [
+    "ingestion: 12/12 records valid",
+    "analysis: scored 12 projects with LogisticRegression",
+    "decision: ranked 12 projects, verdicts {'INVEST': 5, 'REVIEW': 1, 'REJECT': 6}"
+  ]
+}

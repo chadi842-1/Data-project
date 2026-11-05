@@ -1,0 +1,31 @@
+{
+  "n_pools": 200,
+  "pool_size": 12,
+  "nonlinearity": 1.0,
+  "chance_pick_rank": 6.5,
+  "topsis_vs_truth": {
+    "mean": 0.708,
+    "p05": 0.406,
+    "p95": 0.923
+  },
+  "ml_vs_truth": {
+    "mean": 0.91,
+    "p05": 0.776,
+    "p95": 0.986
+  },
+  "topsis_vs_ml": {
+    "mean": 0.77,
+    "p05": 0.44,
+    "p95": 0.944
+  },
+  "topsis_pick_true_rank": {
+    "mean": 2.32,
+    "p05": 1.0,
+    "p95": 7.05
+  },
+  "ml_pick_true_rank": {
+    "mean": 1.305,
+    "p05": 1.0,
+    "p95": 3.0
+  }
+}

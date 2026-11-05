@@ -1,0 +1,100 @@
+{
+  "best_model": "LogisticRegression",
+  "selection_reason": "no model beat the baseline validation F1 (0.773) by more than 0.01; simpler model kept",
+  "settings": {
+    "n_train": 1400,
+    "n_val": 300,
+    "n_test": 300,
+    "n_boot": 2000,
+    "n_iter": 20,
+    "cv_folds": 5,
+    "parsimony_margin": 0.01
+  },
+  "models": {
+    "LogisticRegression": {
+      "best_params": {
+        "clf__C": 1.256104370001356
+      },
+      "cv_log_loss": 0.3941001916329564,
+      "threshold": 0.44000000000000006,
+      "val_f1": 0.7730496453900709,
+      "test": {
+        "f1": 0.7762237762237763,
+        "precision": 0.7350993377483444,
+        "recall": 0.8222222222222222,
+        "auc": 0.8960718294051627,
+        "brier": 0.132629506089081
+      },
+      "test_f1_ci95": [
+        0.7208480565371025,
+        0.8262334927140256
+      ]
+    },
+    "LightGBM": {
+      "best_params": {
+        "clf__colsample_bytree": 0.9533121035675474,
+        "clf__learning_rate": 0.04220607989086146,
+        "clf__min_child_samples": 32,
+        "clf__n_estimators": 310,
+        "clf__num_leaves": 4,
+        "clf__reg_lambda": 0.012261087663689309,
+        "clf__subsample": 0.8590760482165449
+      },
+      "cv_log_loss": 0.39788374841351604,
+      "threshold": 0.5,
+      "val_f1": 0.7769784172661871,
+      "test": {
+        "f1": 0.7878787878787878,
+        "precision": 0.8062015503875969,
+        "recall": 0.7703703703703704,
+        "auc": 0.9097643097643098,
+        "brier": 0.12152583823259396
+      },
+      "test_f1_ci95": [
+        0.7295057859209257,
+        0.8389565490689086
+      ],
+      "f1_diff_vs_baseline": {
+        "mean": 0.011330538626451527,
+        "ci95": [
+          -0.032105562349574776,
+          0.05338045822196654
+        ],
+        "p_better": 0.711
+      }
+    },
+    "XGBoost": {
+      "best_params": {
+        "clf__colsample_bytree": 0.6185801650879991,
+        "clf__learning_rate": 0.0810167556265935,
+        "clf__max_depth": 2,
+        "clf__min_child_weight": 9,
+        "clf__n_estimators": 246,
+        "clf__reg_lambda": 0.0011299516083106617,
+        "clf__subsample": 0.9768807022739411
+      },
+      "cv_log_loss": 0.39717706441879275,
+      "threshold": 0.54,
+      "val_f1": 0.7794117647058824,
+      "test": {
+        "f1": 0.803088803088803,
+        "precision": 0.8387096774193549,
+        "recall": 0.7703703703703704,
+        "auc": 0.9061279461279461,
+        "brier": 0.124352365732193
+      },
+      "test_f1_ci95": [
+        0.7468852955318505,
+        0.8541170251173344
+      ],
+      "f1_diff_vs_baseline": {
+        "mean": 0.02627784397880199,
+        "ci95": [
+          -0.014063506424799137,
+          0.0672570671244205
+        ],
+        "p_better": 0.892
+      }
+    }
+  }
+}

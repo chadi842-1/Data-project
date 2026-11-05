@@ -1,0 +1,26 @@
+{
+  "n_raw": 2030,
+  "n_duplicates_dropped": 25,
+  "n_schema_rejected": 5,
+  "n_final": 2000,
+  "missing_rate": {
+    "rentabilite": 0.02,
+    "risque": 0.0,
+    "delai": 0.02,
+    "impact": 0.0,
+    "cout": 0.0,
+    "liquidite": 0.02,
+    "maturite": 0.02,
+    "conformite": 0.0
+  },
+  "split_sizes": {
+    "train": 1400,
+    "val": 300,
+    "test": 300
+  },
+  "invest_rate": {
+    "train": 0.45,
+    "val": 0.45,
+    "test": 0.45
+  }
+}
