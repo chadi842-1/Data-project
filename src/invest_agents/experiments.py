@@ -89,26 +89,34 @@ def summarise(raw: pd.DataFrame) -> pd.DataFrame:
 
 
 def plot_study(raw: pd.DataFrame, out_path) -> None:
+    """Paired AUC gap (tree minus logistic regression) per nonlinearity level."""
     import matplotlib.pyplot as plt
 
     viz.apply_style()
-    fig, axes = plt.subplots(1, 2, figsize=(10.5, 4.2))
-    for ax, (metric, label) in zip(axes, [("auc", "Test AUC"), ("f1", "Test F1")], strict=True):
-        agg = raw.groupby(["model", "nonlinearity"])[metric].agg(["mean", "std"]).reset_index()
-        for m in MODELS:
-            a = agg[agg["model"] == m].sort_values("nonlinearity")
-            color = viz.MODEL_COLORS[m]
-            ax.fill_between(a["nonlinearity"], a["mean"] - a["std"], a["mean"] + a["std"],
-                            color=color, alpha=0.12, lw=0)
-            ax.plot(a["nonlinearity"], a["mean"], "-o", color=color, lw=2, ms=6,
-                    mec=viz.SURFACE, mew=1.5)
-        last = agg[agg["nonlinearity"] == agg["nonlinearity"].max()].set_index("model")["mean"]
-        for m in MODELS:  # direct labels at the right edge, in ink color
-            ax.annotate(m, (agg["nonlinearity"].max(), last[m]), xytext=(8, 0),
-                        textcoords="offset points", va="center", fontsize=9, color=viz.INK)
-        ax.set_xlabel("Nonlinearity of the committee rule (0 = additive)")
-        ax.set_xlim(-0.1, agg["nonlinearity"].max() * 1.45)
-        viz.title(ax, label, "mean over seeds, band = ±1 sd")
+    piv = raw.pivot_table(index=["nonlinearity", "seed"], columns="model", values="auc")
+    fig, ax = plt.subplots(figsize=(7.5, 4.2))
+    ax.axhline(0, color=viz.INK_2, lw=1.2, ls=(0, (4, 3)))
+    levels = sorted(raw["nonlinearity"].unique())
+    offsets = {"LightGBM": -0.025, "XGBoost": 0.025}
+    for m in ("LightGBM", "XGBoost"):
+        gap = (piv[m] - piv[BASELINE]).groupby(level="nonlinearity")
+        mean, sd = gap.mean().reindex(levels), gap.std(ddof=1).reindex(levels)
+        x = [lv + offsets[m] for lv in levels]
+        color = viz.MODEL_COLORS[m]
+        ax.errorbar(x, mean, yerr=sd, color=color, lw=2, marker="o", ms=7, mec=viz.SURFACE,
+                    mew=1.5, capsize=3, elinewidth=1.2)
+        ax.annotate(m, (x[-1], mean.iloc[-1]), xytext=(10, 0), textcoords="offset points",
+                    va="center", fontsize=9, color=viz.INK)
+    ax.set_xlim(-0.15, max(levels) + 0.75)
+    ax.set_xlabel("Nonlinearity of the committee rule (0 = purely additive)")
+    ax.set_ylabel("AUC gap: tree minus logistic regression")
+    ax.text(max(levels) + 0.7, 0.0005, "tree better", ha="right", va="bottom", fontsize=8,
+            color=viz.INK_2)
+    ax.text(max(levels) + 0.7, -0.0005, "logistic regression better", ha="right", va="top",
+            fontsize=8, color=viz.INK_2)
+    n_seeds = raw["seed"].nunique()
+    viz.title(ax, "Trees only help once the rules are strongly nonlinear",
+              f"Paired test-AUC difference, mean ± 1 sd over {n_seeds} independent datasets")
     fig.tight_layout()
     fig.savefig(out_path, dpi=140)
     plt.close(fig)
