@@ -125,7 +125,8 @@ def render_results(paths: Paths) -> str:
         pb = f"{d['p_better']:.2f}" if d else "-"
         L.append(f"| {name} | {r['cv_log_loss']:.3f} | {r['val_f1']:.3f} | {t['f1']:.3f} "
                  f"{_ci(r['test_f1_ci95'])} | {t['auc']:.3f} | {t['brier']:.3f} | {diff} | {pb} |")
-    L += ["", f"**Selected: {metrics['best_model']}.** {metrics['selection_reason']}.", "",
+    reason = metrics["selection_reason"]
+    L += ["", f"**Selected: {metrics['best_model']}.** {reason[0].upper() + reason[1:]}.", "",
           "A model is only better than the baseline if the interval for its F1 difference "
           "excludes 0. Intervals that straddle 0 are noise at this test size.", "",
           "![Model comparison](model_comparison.png)", "",
