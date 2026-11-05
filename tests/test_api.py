@@ -1,3 +1,5 @@
+import io
+
 import pandas as pd
 import pytest
 from fastapi.testclient import TestClient
@@ -69,7 +71,47 @@ def test_request_level_validation(client, body):
 
 def test_openapi_documents_the_endpoints(client):
     paths = client.get("/openapi.json").json()["paths"]
-    assert {"/decide", "/health", "/ready", "/model-info"} <= set(paths)
+    assert {"/", "/decide", "/decide/csv", "/health", "/ready", "/model-info"} <= set(paths)
+
+
+def test_root_lists_endpoints(client):
+    r = client.get("/")
+    assert r.status_code == 200
+    body = r.json()
+    assert body["service"] == "invest-agents" and "/decide" in body["endpoints"]
+
+
+def test_every_response_carries_request_id_and_timing(client):
+    r = client.get("/health")
+    assert r.headers["x-request-id"]
+    assert float(r.headers["x-process-time-ms"]) >= 0
+    # a client-supplied request id is echoed back
+    r2 = client.get("/health", headers={"x-request-id": "trace-123"})
+    assert r2.headers["x-request-id"] == "trace-123"
+
+
+def test_decide_csv_ranks_an_uploaded_pool(client, body):
+    df = pd.DataFrame(body)
+    buf = io.BytesIO(df.to_csv(index=False).encode())
+    r = client.post("/decide/csv", files={"file": ("pool.csv", buf, "text/csv")})
+    assert r.status_code == 200
+    res = WorkflowResult.model_validate(r.json())
+    assert res.ingestion.n_valid == 6 and len(res.decision.recommendations) == 6
+
+
+def test_decide_csv_honours_policy_query_params(client, body):
+    df = pd.DataFrame(body)
+    buf = io.BytesIO(df.to_csv(index=False).encode())
+    r = client.post("/decide/csv?invest_proba=1.0&reject_proba=0.0",
+                    files={"file": ("pool.csv", buf, "text/csv")})
+    assert r.status_code == 200
+    assert all(x["verdict"] != "INVEST" for x in r.json()["decision"]["recommendations"])
+
+
+def test_decide_csv_rejects_unparsable_upload(client):
+    buf = io.BytesIO(b"\x00\x01not,a,valid\x00csv")
+    r = client.post("/decide/csv", files={"file": ("bad.csv", buf, "text/csv")})
+    assert r.status_code == 422
 
 
 def test_service_reports_503_when_the_model_is_missing(tmp_path, monkeypatch, body):
